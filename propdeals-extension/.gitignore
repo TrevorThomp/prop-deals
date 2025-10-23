@@ -1,0 +1,60 @@
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Node modules (if you add build tools later)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build artifacts
+dist/
+build/
+*.zip
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.local
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Package files (don't commit ZIP packages)
+*.crx
+*.pem
+propdeals-extension-*.zip
+
+# Private keys and secrets
+*.key
+*.pem
+secrets.json
+credentials.json
+
+# Chrome extension development
+/chrome-profile/
+
+# Misc
+.cache/

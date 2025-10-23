@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PropDeals API</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f9fafb;
+    }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #10B981;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #6B7280;
+      margin-bottom: 30px;
+    }
+    h2 {
+      color: #1F2937;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+    code {
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+    a {
+      color: #10B981;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .endpoint {
+      background: #f3f4f6;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      border-left: 3px solid #10B981;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #D1FAE5;
+      color: #065F46;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>PropDeals API <span class="status">LIVE</span></h1>
+    <p class="subtitle">Remote discount data for the PropDeals Chrome extension</p>
+
+    <h2>📡 Endpoints</h2>
+    <div class="endpoint">
+      <strong>Latest Discounts (v1):</strong><br>
+      <code id="apiUrl">Loading...</code><br>
+      <a href="v1/discounts.json" target="_blank" style="margin-top: 10px; display: inline-block;">→ View JSON</a>
+    </div>
+
+    <h2>💡 How It Works</h2>
+    <p>This API serves real-time discount data to the PropDeals Chrome extension. The extension automatically checks for updates every 24 hours and applies the best available discount codes at checkout.</p>
+
+    <h2>🔄 Update Frequency</h2>
+    <ul>
+      <li><strong>Automatic checks:</strong> Every 24 hours by the extension</li>
+      <li><strong>Manual refresh:</strong> Available via popup refresh button</li>
+      <li><strong>Data updates:</strong> As new deals become available</li>
+    </ul>
+
+    <h2>📊 Supported Prop Firms</h2>
+    <ul id="firmsList">
+      <li>Loading...</li>
+    </ul>
+
+    <h2>🔗 Links</h2>
+    <ul>
+      <li><a href="https://chrome.google.com/webstore">Chrome Extension</a> (coming soon)</li>
+      <li><a href="https://github.com/YOUR_USERNAME/propdeals-extension">Extension Source Code</a></li>
+      <li><a href="https://github.com/YOUR_USERNAME/propdeals-api">API Repository</a></li>
+    </ul>
+
+    <h2>📧 Support</h2>
+    <p>For issues or questions, please open an issue on GitHub or email <a href="mailto:support@propdeals.com">support@propdeals.com</a></p>
+
+    <hr style="margin: 40px 0; border: none; border-top: 1px solid #E5E7EB;">
+    <p style="text-align: center; color: #6B7280; font-size: 12px;">
+      PropDeals API &copy; 2025 &nbsp;|&nbsp; <span id="version">Loading...</span>
+    </p>
+  </div>
+
+  <script>
+    // Fetch and display current discounts info
+    fetch('v1/discounts.json')
+      .then(res => res.json())
+      .then(data => {
+        // Update version
+        document.getElementById('version').textContent = `Version ${data.version}`;
+
+        // Update API URL
+        const apiUrl = window.location.href + 'v1/discounts.json';
+        document.getElementById('apiUrl').textContent = apiUrl;
+
+        // Update firms list
+        const firmsList = document.getElementById('firmsList');
+        firmsList.innerHTML = '';
+        data.firms.forEach(firm => {
+          const li = document.createElement('li');
+          const hasDiscount = firm.discount && firm.discount.amount > 0;
+          li.innerHTML = `<strong>${firm.name}</strong> - ${hasDiscount ? `${firm.discount.amount}% OFF` : 'No active discount'}`;
+          firmsList.appendChild(li);
+        });
+      })
+      .catch(err => {
+        console.error('Failed to load discounts:', err);
+        document.getElementById('version').textContent = 'Error loading data';
+      });
+  </script>
+</body>
+</html>

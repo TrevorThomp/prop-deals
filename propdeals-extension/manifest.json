@@ -1,0 +1,86 @@
+{
+  "manifest_version": 3,
+  "name": "PropDeals - Prop Firm Discounts",
+  "version": "1.0.0",
+  "description": "Automatically apply discount codes to prop trading firm purchases and never miss a deal",
+  "permissions": [
+    "storage",
+    "notifications",
+    "activeTab",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://raw.githubusercontent.com/*",
+    "https://www.ftmo.com/*",
+    "https://trader.ftmo.com/*",
+    "https://www.apextraderfunding.com/*",
+    "https://www.topstepfx.com/*",
+    "https://www.myfundedfutures.com/*",
+    "https://my.myfundedfutures.com/*",
+    "https://www.the5ers.com/*"
+  ],
+  "background": {
+    "service_worker": "scripts/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.ftmo.com/*",
+        "https://trader.ftmo.com/*"
+      ],
+      "js": ["scripts/content/shared-utils.js", "scripts/content/ftmo-content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.apextraderfunding.com/*"
+      ],
+      "js": ["scripts/content/shared-utils.js", "scripts/content/apex-content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.topstepfx.com/*"
+      ],
+      "js": ["scripts/content/shared-utils.js", "scripts/content/topstep-content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.myfundedfutures.com/*",
+        "https://my.myfundedfutures.com/*"
+      ],
+      "js": ["scripts/content/shared-utils.js", "scripts/content/myfundedfutures-content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.the5ers.com/*"
+      ],
+      "js": ["scripts/content/shared-utils.js", "scripts/content/the5ers-content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_page": "pages/settings.html",
+  "action": {
+    "default_popup": "pages/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["data/discounts.json"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

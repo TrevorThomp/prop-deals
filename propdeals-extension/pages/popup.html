@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PropDeals - Prop Firm Discounts</title>
+  <link rel="stylesheet" href="../styles/popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-section">
+          <img src="../icons/icon48.png" alt="PropDeals" class="logo">
+          <div class="header-text">
+            <h1 class="title">PropDeals</h1>
+            <p class="tagline">Save on prop firm evaluations</p>
+          </div>
+        </div>
+        <button class="settings-btn" id="settingsBtn" title="Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 1v6m0 6v6m0-6h6m-6 0H6"></path>
+            <path d="m16.24 7.76 4.24-4.24m-4.24 4.24-4.24-4.24m12.48 12.48-4.24-4.24m0 0 4.24 4.24M7.76 16.24 3.52 20.48m4.24-4.24L3.52 12"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Deals List -->
+    <main class="deals-container" id="dealsContainer">
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Loading deals...</p>
+      </div>
+
+      <!-- Deals will be dynamically inserted here -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p class="disclosure">
+        💡 We earn affiliate commissions at no cost to you.
+        <a href="#" id="howItWorksLink">How it works</a>
+      </p>
+    </footer>
+  </div>
+
+  <!-- How It Works Modal -->
+  <div class="modal" id="howItWorksModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>How PropDeals Works</h2>
+        <button class="modal-close" id="closeModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="info-section">
+          <h3>🎯 What We Do</h3>
+          <p>PropDeals automatically finds and applies the best discount codes for prop trading firm evaluations. We track deals across major prop firms so you don't have to.</p>
+        </div>
+
+        <div class="info-section">
+          <h3>💰 How We Make Money</h3>
+          <p>When you purchase through our links, we earn a small affiliate commission from the prop firm. This costs you nothing extra - in fact, you save money with our exclusive discount codes!</p>
+        </div>
+
+        <div class="info-section">
+          <h3>🔒 Your Privacy</h3>
+          <p>We don't collect, store, or sell your personal data. The extension only stores your notification preferences locally on your device.</p>
+        </div>
+
+        <div class="info-section">
+          <h3>✅ Our Promise</h3>
+          <p>We only promote legitimate prop firms with active affiliate programs. All discounts are real and verified regularly.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="closeModalBtn">Got it!</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../scripts/popup.js"></script>
+</body>
+</html>

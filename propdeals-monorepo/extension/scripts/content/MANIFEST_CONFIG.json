@@ -1,0 +1,73 @@
+{
+  "// NOTE": "Add this content_scripts array to your manifest.json",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.ftmo.com/checkout*",
+        "https://www.ftmo.com/cart*",
+        "https://trader.ftmo.com/checkout*"
+      ],
+      "js": [
+        "scripts/content/shared-utils.js",
+        "scripts/content/ftmo-content.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.apextraderfunding.com/checkout*",
+        "https://www.apextraderfunding.com/cart*"
+      ],
+      "js": [
+        "scripts/content/shared-utils.js",
+        "scripts/content/apex-content.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.topstepfx.com/checkout*"
+      ],
+      "js": [
+        "scripts/content/shared-utils.js",
+        "scripts/content/topstep-content.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.myfundedfutures.com/checkout*",
+        "https://my.myfundedfutures.com/checkout*"
+      ],
+      "js": [
+        "scripts/content/shared-utils.js",
+        "scripts/content/myfundedfutures-content.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.the5ers.com/checkout*"
+      ],
+      "js": [
+        "scripts/content/shared-utils.js",
+        "scripts/content/the5ers-content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "// PERMISSIONS NOTE": "Also ensure your manifest.json includes these permissions",
+  "permissions": [
+    "storage",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "https://www.ftmo.com/*",
+    "https://trader.ftmo.com/*",
+    "https://www.apextraderfunding.com/*",
+    "https://www.topstepfx.com/*",
+    "https://www.myfundedfutures.com/*",
+    "https://my.myfundedfutures.com/*",
+    "https://www.the5ers.com/*"
+  ]
+}

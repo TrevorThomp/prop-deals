@@ -1,0 +1,115 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2025-10-23T12:00:00Z",
+  "firms": [
+    {
+      "id": "ftmo",
+      "name": "FTMO",
+      "logo_url": "https://www.ftmo.com/favicon.ico",
+      "site_url": "https://www.ftmo.com",
+      "affiliate_url": "https://www.ftmo.com/?ref=propdeals",
+      "affiliate_code": "PROPDEALS15",
+      "discount": {
+        "type": "percentage",
+        "amount": 15,
+        "expires_at": "2025-11-01T00:00:00Z",
+        "description": "15% off all challenges"
+      },
+      "checkout_urls": [
+        "https://www.ftmo.com/checkout",
+        "https://www.ftmo.com/cart",
+        "https://trader.ftmo.com/checkout"
+      ],
+      "selectors": {
+        "code_field": "#discount-code, input[name='discount'], input[placeholder*='discount' i], input[placeholder*='coupon' i], input[placeholder*='promo' i]",
+        "apply_button": "button[type='submit'].apply-coupon, button:has-text('Apply'), .coupon-apply-button, button.btn-apply"
+      }
+    },
+    {
+      "id": "apex",
+      "name": "Apex Trader Funding",
+      "logo_url": "https://www.apextraderfunding.com/favicon.ico",
+      "site_url": "https://www.apextraderfunding.com",
+      "affiliate_url": "https://www.apextraderfunding.com/?ref=propdeals",
+      "affiliate_code": "PROPDEALS10",
+      "discount": {
+        "type": "percentage",
+        "amount": 10,
+        "expires_at": "2025-10-30T00:00:00Z",
+        "description": "10% off all evaluations"
+      },
+      "checkout_urls": [
+        "https://www.apextraderfunding.com/checkout",
+        "https://www.apextraderfunding.com/cart"
+      ],
+      "selectors": {
+        "code_field": "input[name='coupon'], input[placeholder*='coupon' i], #coupon_code",
+        "apply_button": "button.apply-coupon, button[name='apply_coupon']"
+      }
+    },
+    {
+      "id": "topstep",
+      "name": "TopStepFX",
+      "logo_url": "https://www.topstepfx.com/favicon.ico",
+      "site_url": "https://www.topstepfx.com",
+      "affiliate_url": "https://www.topstepfx.com/?ref=propdeals",
+      "affiliate_code": "PROPDEALS20",
+      "discount": {
+        "type": "percentage",
+        "amount": 20,
+        "expires_at": "2025-11-15T00:00:00Z",
+        "description": "20% off first month"
+      },
+      "checkout_urls": [
+        "https://www.topstepfx.com/checkout"
+      ],
+      "selectors": {
+        "code_field": "#promo_code, input[name='promo_code']",
+        "apply_button": "button#apply_promo, .promo-apply"
+      }
+    },
+    {
+      "id": "myfundedfutures",
+      "name": "MyFundedFutures",
+      "logo_url": "https://www.myfundedfutures.com/favicon.ico",
+      "site_url": "https://www.myfundedfutures.com",
+      "affiliate_url": "https://www.myfundedfutures.com/?ref=propdeals",
+      "affiliate_code": "PROPDEALS12",
+      "discount": {
+        "type": "percentage",
+        "amount": 12,
+        "expires_at": "2025-11-10T00:00:00Z",
+        "description": "12% off all accounts"
+      },
+      "checkout_urls": [
+        "https://www.myfundedfutures.com/checkout",
+        "https://my.myfundedfutures.com/checkout"
+      ],
+      "selectors": {
+        "code_field": "input.coupon_code, input#coupon_code",
+        "apply_button": "button[name='apply_coupon']"
+      }
+    },
+    {
+      "id": "the5ers",
+      "name": "The5ers",
+      "logo_url": "https://www.the5ers.com/favicon.ico",
+      "site_url": "https://www.the5ers.com",
+      "affiliate_url": "https://www.the5ers.com/?ref=propdeals",
+      "affiliate_code": "PROPDEALS8",
+      "discount": {
+        "type": "percentage",
+        "amount": 8,
+        "expires_at": "2025-11-05T00:00:00Z",
+        "description": "8% off instant funding"
+      },
+      "checkout_urls": [
+        "https://www.the5ers.com/checkout"
+      ],
+      "selectors": {
+        "code_field": "#discount_code, input[name='discount']",
+        "apply_button": "button.apply-discount"
+      }
+    }
+  ]
+}
