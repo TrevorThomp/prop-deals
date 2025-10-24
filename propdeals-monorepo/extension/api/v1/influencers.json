@@ -1,0 +1,92 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2025-10-23T00:00:00Z",
+  "influencers": [
+    {
+      "id": "tradewithJohn",
+      "name": "Trade With John",
+      "display_name": "John's Trading Deals",
+      "status": "active",
+      "branding": {
+        "theme_name": "Trading Blue",
+        "primary_color": "#3B82F6",
+        "secondary_color": "#1E40AF",
+        "accent_color": "#60A5FA",
+        "logo_text": "John's Deals",
+        "tagline": "Exclusive discounts for my community"
+      },
+      "social": {
+        "youtube": "https://youtube.com/@tradewithJohn",
+        "twitter": "https://twitter.com/tradewithJohn",
+        "discord": "https://discord.gg/tradewithJohn"
+      },
+      "affiliate_codes": {
+        "ftmo": {
+          "code": "JOHN15",
+          "url": "https://www.ftmo.com/?ref=tradewithJohn"
+        },
+        "apex": {
+          "code": "JOHN10",
+          "url": "https://www.apextraderfunding.com/?ref=tradewithJohn"
+        },
+        "topstep": {
+          "code": "JOHNTOP20",
+          "url": "https://www.topstepfx.com/?ref=tradewithJohn"
+        }
+      },
+      "enabled_firms": ["ftmo", "apex", "topstep"],
+      "custom_discounts": {
+        "topstep": {
+          "amount": 25,
+          "description": "25% off first month - John's exclusive deal!",
+          "expires_at": "2025-12-31T23:59:59Z"
+        }
+      },
+      "welcome_message": "Welcome to PropDeals! Thanks for supporting John's channel. You're getting exclusive deals!",
+      "joined_at": "2025-01-15T00:00:00Z"
+    },
+    {
+      "id": "propAcademy",
+      "name": "Prop Trading Academy",
+      "display_name": "Academy Deals",
+      "status": "active",
+      "branding": {
+        "theme_name": "Gold Rush",
+        "primary_color": "#F59E0B",
+        "secondary_color": "#D97706",
+        "accent_color": "#FCD34D",
+        "logo_text": "Academy Deals",
+        "tagline": "Student-exclusive prop firm deals"
+      },
+      "social": {
+        "website": "https://propacademy.com",
+        "discord": "https://discord.gg/propacademy"
+      },
+      "affiliate_codes": {
+        "ftmo": {
+          "code": "ACADEMY15",
+          "url": "https://www.ftmo.com/?ref=propAcademy"
+        },
+        "apex": {
+          "code": "ACADEMY10",
+          "url": "https://www.apextraderfunding.com/?ref=propAcademy"
+        },
+        "topstep": {
+          "code": "ACADEMY20",
+          "url": "https://www.topstepfx.com/?ref=propAcademy"
+        },
+        "myfundedfutures": {
+          "code": "ACADEMY12",
+          "url": "https://www.myfundedfutures.com/?ref=propAcademy"
+        },
+        "the5ers": {
+          "code": "ACADEMY8",
+          "url": "https://www.the5ers.com/?ref=propAcademy"
+        }
+      },
+      "enabled_firms": ["ftmo", "apex", "topstep", "myfundedfutures", "the5ers"],
+      "welcome_message": "Welcome, Prop Academy student! Get your exclusive discounts on the best prop firms.",
+      "joined_at": "2025-01-20T00:00:00Z"
+    }
+  ]
+}

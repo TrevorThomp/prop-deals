@@ -173,6 +173,12 @@
           duration: 5000
         });
 
+        // Track the code application
+        await trackCodeApplication('ftmo', CONFIG.affiliateCode, true, {
+          method: 'auto_apply',
+          page: window.location.pathname
+        });
+
         // Notify background script
         await notifyBackground('code_applied', true);
 

@@ -2,7 +2,10 @@
 // Handles discount updates, notifications, and extension lifecycle
 
 // Constants
+// TODO: Update these URLs when you deploy to GitHub Pages
 const REMOTE_DISCOUNTS_URL = 'https://raw.githubusercontent.com/YOUR_USERNAME/propdeals-api/main/v1/discounts.json';
+const REMOTE_INFLUENCERS_URL = 'https://raw.githubusercontent.com/YOUR_USERNAME/propdeals-api/main/v1/influencers.json';
+const USE_LOCAL_FALLBACK = true; // Set to false when GitHub API is ready
 const DISCOUNT_CHECK_INTERVAL = 24 * 60; // 24 hours in minutes
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 const MIN_FETCH_INTERVAL = 60 * 60 * 1000; // 1 hour minimum between fetches
@@ -13,8 +16,12 @@ const STORAGE_KEYS = {
   NOTIFICATIONS_ENABLED: 'notificationsEnabled',
   SEEN_DEALS: 'seenDeals',
   REMOTE_DISCOUNTS: 'remoteDiscounts',
+  REMOTE_INFLUENCERS: 'remoteInfluencers',
   LAST_FETCH: 'lastFetchTimestamp',
-  FETCH_ERROR_COUNT: 'fetchErrorCount'
+  LAST_INFLUENCER_FETCH: 'lastInfluencerFetch',
+  FETCH_ERROR_COUNT: 'fetchErrorCount',
+  SELECTED_INFLUENCER: 'selected_influencer',
+  INFLUENCER_DATA: 'influencer_data'
 };
 
 // Initialize extension
@@ -44,22 +51,16 @@ async function handleFirstInstall() {
 
   await chrome.storage.local.set({
     [STORAGE_KEYS.LAST_CHECK]: Date.now(),
-    [STORAGE_KEYS.DISCOUNT_VERSION]: '1.0.0'
+    [STORAGE_KEYS.DISCOUNT_VERSION]: '1.0.0',
+    onboarding_completed: false
   });
 
-  // Show welcome notification
-  await showNotification({
-    title: 'Welcome to PropDeals!',
-    message: 'We\'ll notify you when new prop firm discounts become available.',
-    iconUrl: 'icons/icon128.png',
-    type: 'basic'
-  });
-
-  // Fetch remote discounts on first install
+  // Fetch remote data on first install
   await fetchRemoteDiscounts();
+  await fetchRemoteInfluencers();
 
-  // Open popup to show initial deals
-  chrome.action.openPopup();
+  // Open onboarding page
+  chrome.tabs.create({ url: chrome.runtime.getURL('pages/onboarding.html') });
 }
 
 // Handle extension update
@@ -76,6 +77,12 @@ async function handleUpdate(previousVersion) {
 
 // Fetch discounts from remote URL
 async function fetchRemoteDiscounts(force = false) {
+  // If using local fallback, skip remote fetch
+  if (USE_LOCAL_FALLBACK) {
+    console.log('Using local discounts (USE_LOCAL_FALLBACK = true)');
+    return await loadBundledDiscounts();
+  }
+
   try {
     // Check rate limiting (unless forced)
     if (!force) {
@@ -174,22 +181,72 @@ async function getCachedDiscounts() {
 async function getCurrentDiscounts() {
   const storage = await chrome.storage.local.get([
     STORAGE_KEYS.REMOTE_DISCOUNTS,
-    STORAGE_KEYS.LAST_FETCH
+    STORAGE_KEYS.LAST_FETCH,
+    STORAGE_KEYS.INFLUENCER_DATA
   ]);
 
   const cachedData = storage[STORAGE_KEYS.REMOTE_DISCOUNTS];
   const lastFetch = storage[STORAGE_KEYS.LAST_FETCH] || 0;
   const timeSinceLastFetch = Date.now() - lastFetch;
 
+  let discountData;
+
   // If cache exists and is fresh, use it
   if (cachedData && timeSinceLastFetch < CACHE_DURATION) {
     console.log('Using cached discounts (fresh)');
-    return cachedData;
+    discountData = cachedData;
+  } else {
+    // Cache is stale or doesn't exist - fetch fresh
+    console.log('Cache stale or missing - fetching fresh data');
+    discountData = await fetchRemoteDiscounts();
   }
 
-  // Cache is stale or doesn't exist - fetch fresh
-  console.log('Cache stale or missing - fetching fresh data');
-  return await fetchRemoteDiscounts();
+  // Merge with influencer-specific codes and discounts if influencer is selected
+  const influencer = storage[STORAGE_KEYS.INFLUENCER_DATA];
+  if (influencer) {
+    discountData = mergeInfluencerData(discountData, influencer);
+  }
+
+  return discountData;
+}
+
+// Merge influencer-specific affiliate codes and custom discounts
+function mergeInfluencerData(discountData, influencer) {
+  // Clone the data to avoid mutation
+  const mergedData = JSON.parse(JSON.stringify(discountData));
+
+  // Filter to only enabled firms if influencer has enabled_firms
+  if (influencer.enabled_firms && influencer.enabled_firms.length > 0) {
+    mergedData.firms = mergedData.firms.filter(firm =>
+      influencer.enabled_firms.includes(firm.id)
+    );
+  }
+
+  // Apply influencer's affiliate codes and custom discounts
+  mergedData.firms = mergedData.firms.map(firm => {
+    const influencerCodes = influencer.affiliate_codes?.[firm.id];
+    const customDiscount = influencer.custom_discounts?.[firm.id];
+
+    // Use influencer's affiliate code and URL if available
+    if (influencerCodes) {
+      firm.affiliate_code = influencerCodes.code;
+      firm.affiliate_url = influencerCodes.url;
+    }
+
+    // Override discount with influencer's custom discount if available
+    if (customDiscount) {
+      firm.discount = {
+        ...firm.discount,
+        amount: customDiscount.amount,
+        description: customDiscount.description,
+        expires_at: customDiscount.expires_at
+      };
+    }
+
+    return firm;
+  });
+
+  return mergedData;
 }
 
 // Validate discount data structure
@@ -391,12 +448,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === 'track_event') {
     handleAnalyticsEvent(request.event, request.properties);
   } else if (request.type === 'code_applied') {
-    handleCodeApplied(request.firm, request.code, request.success);
+    handleCodeApplied(request.firm, request.code, request.success, request.metadata);
+  } else if (request.type === 'deal_button_clicked') {
+    handleDealButtonClicked(request.firm, request.code, request.metadata);
   } else if (request.type === 'get_discounts') {
     handleGetDiscounts(sendResponse);
     return true; // Keep channel open for async response
   } else if (request.type === 'refresh_discounts') {
     handleRefreshDiscounts(sendResponse);
+    return true; // Keep channel open for async response
+  } else if (request.type === 'get_influencers') {
+    handleGetInfluencers(sendResponse);
+    return true; // Keep channel open for async response
+  } else if (request.type === 'set_influencer') {
+    handleSetInfluencer(request.influencer, sendResponse);
     return true; // Keep channel open for async response
   }
 });
@@ -405,19 +470,57 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 function handleAnalyticsEvent(eventName, properties) {
   console.log('Analytics Event:', eventName, properties);
   // In production, this could send to Google Analytics, Mixpanel, etc.
+
+  // TODO: When analytics backend is ready, send data here
+  // Example:
+  // fetch('https://api.propdeals.com/v1/analytics', {
+  //   method: 'POST',
+  //   headers: { 'Content-Type': 'application/json' },
+  //   body: JSON.stringify({ event: eventName, properties })
+  // });
 }
 
 // Handle code application result from content script
-function handleCodeApplied(firm, code, success) {
+function handleCodeApplied(firm, code, success, metadata = null) {
   console.log(`Code application ${success ? 'succeeded' : 'failed'}:`, firm, code);
 
+  if (metadata) {
+    console.log('Code application metadata:', metadata);
+  }
+
   if (success) {
-    // Track successful conversion
-    handleAnalyticsEvent('code_applied_success', { firm, code });
+    // Track successful conversion with full metadata
+    handleAnalyticsEvent('code_applied_success', {
+      firm,
+      code,
+      applied_by: metadata?.applied_by || 'unknown',
+      influencer_id: metadata?.influencer_id,
+      session_id: metadata?.session_id,
+      ...metadata
+    });
   } else {
     // Track failure for monitoring
-    handleAnalyticsEvent('code_applied_failure', { firm, code });
+    handleAnalyticsEvent('code_applied_failure', { firm, code, metadata });
   }
+}
+
+// Handle deal button click from popup
+function handleDealButtonClicked(firm, code, metadata = null) {
+  console.log('Deal button clicked:', firm, code);
+
+  if (metadata) {
+    console.log('Deal click metadata:', metadata);
+  }
+
+  // Track the click with full attribution data
+  handleAnalyticsEvent('deal_button_clicked', {
+    firm,
+    code,
+    source: metadata?.source || 'unknown',
+    influencer_id: metadata?.influencer_id,
+    session_id: metadata?.session_id,
+    ...metadata
+  });
 }
 
 // Handle discount data request
@@ -439,6 +542,168 @@ async function handleRefreshDiscounts(sendResponse) {
     sendResponse({ success: true, data });
   } catch (error) {
     console.error('Error refreshing discounts:', error);
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+// ============================================
+// INFLUENCER MANAGEMENT
+// ============================================
+
+// Load bundled influencers (local fallback)
+async function loadBundledInfluencers() {
+  try {
+    const response = await fetch(chrome.runtime.getURL('api/v1/influencers.json'));
+    const data = await response.json();
+    console.log('Loaded bundled influencers');
+    return data;
+  } catch (error) {
+    console.error('Failed to load bundled influencers:', error);
+    return { version: '1.0.0', influencers: [] };
+  }
+}
+
+// Fetch influencers from remote URL
+async function fetchRemoteInfluencers(force = false) {
+  // If using local fallback, use bundled influencers
+  if (USE_LOCAL_FALLBACK) {
+    console.log('Using local influencers (USE_LOCAL_FALLBACK = true)');
+    return await loadBundledInfluencers();
+  }
+
+  try {
+    // Check rate limiting (unless forced)
+    if (!force) {
+      const storage = await chrome.storage.local.get(STORAGE_KEYS.LAST_INFLUENCER_FETCH);
+      const lastFetch = storage[STORAGE_KEYS.LAST_INFLUENCER_FETCH] || 0;
+      const timeSinceLastFetch = Date.now() - lastFetch;
+
+      if (timeSinceLastFetch < MIN_FETCH_INTERVAL) {
+        console.log('Rate limited - influencer fetch too soon, using cache');
+        return await getCachedInfluencers();
+      }
+    }
+
+    console.log('Fetching remote influencers...');
+
+    const response = await fetch(REMOTE_INFLUENCERS_URL, {
+      method: 'GET',
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Accept': 'application/json'
+      },
+      signal: AbortSignal.timeout(10000) // 10 second timeout
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    if (!validateInfluencerData(data)) {
+      throw new Error('Invalid influencer data format');
+    }
+
+    // Cache the data
+    await chrome.storage.local.set({
+      [STORAGE_KEYS.REMOTE_INFLUENCERS]: data,
+      [STORAGE_KEYS.LAST_INFLUENCER_FETCH]: Date.now()
+    });
+
+    console.log('Influencers fetched and cached successfully');
+    return data;
+
+  } catch (error) {
+    console.error('Failed to fetch remote influencers:', error);
+
+    // Fallback to cached data
+    const cached = await getCachedInfluencers();
+    if (cached) {
+      console.log('Using cached influencers after fetch failure');
+      return cached;
+    }
+
+    // If no cache, return empty data
+    return { version: '1.0.0', influencers: [] };
+  }
+}
+
+// Get cached influencers
+async function getCachedInfluencers() {
+  const storage = await chrome.storage.local.get(STORAGE_KEYS.REMOTE_INFLUENCERS);
+  return storage[STORAGE_KEYS.REMOTE_INFLUENCERS] || null;
+}
+
+// Get current influencers with caching logic
+async function getCurrentInfluencers() {
+  const storage = await chrome.storage.local.get([
+    STORAGE_KEYS.REMOTE_INFLUENCERS,
+    STORAGE_KEYS.LAST_INFLUENCER_FETCH
+  ]);
+
+  const timeSinceLastFetch = Date.now() - (storage[STORAGE_KEYS.LAST_INFLUENCER_FETCH] || 0);
+
+  // Use cache if recent (24 hours)
+  if (storage[STORAGE_KEYS.REMOTE_INFLUENCERS] && timeSinceLastFetch < CACHE_DURATION) {
+    return storage[STORAGE_KEYS.REMOTE_INFLUENCERS];
+  }
+
+  // Otherwise fetch fresh data
+  return await fetchRemoteInfluencers();
+}
+
+// Validate influencer data structure
+function validateInfluencerData(data) {
+  try {
+    if (!data || typeof data !== 'object') return false;
+    if (!data.version || !Array.isArray(data.influencers)) return false;
+
+    // Validate each influencer has required fields
+    for (const influencer of data.influencers) {
+      if (!influencer.id || !influencer.name || !influencer.branding) return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Influencer validation error:', error);
+    return false;
+  }
+}
+
+// Handle influencer data request
+async function handleGetInfluencers(sendResponse) {
+  try {
+    const data = await getCurrentInfluencers();
+
+    // Merge with selected influencer's custom discounts
+    const storage = await chrome.storage.local.get([STORAGE_KEYS.INFLUENCER_DATA]);
+    const selectedInfluencer = storage[STORAGE_KEYS.INFLUENCER_DATA];
+
+    sendResponse({ success: true, data, selectedInfluencer });
+  } catch (error) {
+    console.error('Error fetching influencers:', error);
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+// Handle set influencer
+async function handleSetInfluencer(influencer, sendResponse) {
+  try {
+    await chrome.storage.local.set({
+      [STORAGE_KEYS.SELECTED_INFLUENCER]: influencer.id,
+      [STORAGE_KEYS.INFLUENCER_DATA]: influencer
+    });
+
+    // Track influencer selection
+    handleAnalyticsEvent('influencer_selected', {
+      influencer_id: influencer.id,
+      influencer_name: influencer.name
+    });
+
+    sendResponse({ success: true });
+  } catch (error) {
+    console.error('Error setting influencer:', error);
     sendResponse({ success: false, error: error.message });
   }
 }

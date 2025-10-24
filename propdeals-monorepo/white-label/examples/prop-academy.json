@@ -1,0 +1,82 @@
+{
+  "partner": {
+    "id": "propAcademy",
+    "name": "Prop Trading Academy",
+    "email": "help@proptradingacademy.com",
+    "website": "https://proptradingacademy.com",
+    "social": {
+      "youtube": "https://youtube.com/@propacademy",
+      "discord": "https://discord.gg/propacademy"
+    }
+  },
+  "extension": {
+    "name": "Prop Academy Discounts",
+    "short_name": "PropAcademy",
+    "description": "Exclusive prop firm deals for Prop Academy students",
+    "version": "1.0.0"
+  },
+  "branding": {
+    "theme_name": "Gold Rush",
+    "primary_color": "#F59E0B",
+    "secondary_color": "#D97706",
+    "accent_color": "#FCD34D",
+    "logo_text": "PropAcademy",
+    "tagline": "Student exclusive discounts"
+  },
+  "firms": [
+    {
+      "firm_id": "ftmo",
+      "enabled": true,
+      "affiliate_code": "ACADEMY18",
+      "affiliate_url": "https://www.ftmo.com/?ref=propacademy",
+      "custom_discount": {
+        "amount": 18,
+        "description": "18% off - Academy student exclusive!",
+        "expires_at": "2025-11-30T23:59:59Z"
+      }
+    },
+    {
+      "firm_id": "apex",
+      "enabled": true,
+      "affiliate_code": "ACADEMY12",
+      "affiliate_url": "https://www.apextraderfunding.com/?ref=propacademy"
+    },
+    {
+      "firm_id": "topstep",
+      "enabled": true,
+      "affiliate_code": "ACADEMY15",
+      "affiliate_url": "https://www.topstepfx.com/?ref=propacademy"
+    },
+    {
+      "firm_id": "myfundedfutures",
+      "enabled": true,
+      "affiliate_code": "ACADEMY10",
+      "affiliate_url": "https://www.myfundedfutures.com/?ref=propacademy"
+    },
+    {
+      "firm_id": "the5ers",
+      "enabled": true,
+      "affiliate_code": "ACADEMY8",
+      "affiliate_url": "https://www.the5ers.com/?ref=propacademy"
+    }
+  ],
+  "customization": {
+    "welcome_message": "Welcome Prop Academy student! Your exclusive discounts are now active. Keep learning, keep trading!",
+    "footer_text": "Exclusive for Prop Academy students",
+    "show_partner_branding": true,
+    "custom_features": {
+      "notifications_default": true,
+      "show_expiration_countdown": true
+    }
+  },
+  "monetization": {
+    "model": "revenue_share",
+    "platform_share": 0.25,
+    "partner_share": 0.75
+  },
+  "generated": {
+    "created_at": "2025-10-23T16:00:00Z",
+    "updated_at": "2025-10-23T16:00:00Z",
+    "build_version": "1.0.0"
+  }
+}

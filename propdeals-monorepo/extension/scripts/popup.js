@@ -12,6 +12,18 @@ const closeModalBtn = document.getElementById('closeModalBtn');
 
 // Initialize popup
 document.addEventListener('DOMContentLoaded', async () => {
+  // Check if onboarding is completed
+  const result = await chrome.storage.local.get(['onboarding_completed']);
+  if (!result.onboarding_completed) {
+    // Open onboarding page
+    chrome.tabs.create({ url: chrome.runtime.getURL('pages/onboarding.html') });
+    window.close();
+    return;
+  }
+
+  // Apply influencer branding if set
+  await applyInfluencerBranding();
+
   await loadDeals();
   setupEventListeners();
 });
@@ -123,12 +135,17 @@ function createDealCard(firm) {
   // Add event listeners
   const copyBtn = card.querySelector('.copy-btn');
   if (copyBtn) {
-    copyBtn.addEventListener('click', () => copyCode(firm.affiliate_code, copyBtn));
+    copyBtn.addEventListener('click', () => copyCode(firm.affiliate_code, copyBtn, firm.id));
   }
 
   const dealLink = card.querySelector('[data-firm]');
   if (dealLink) {
-    dealLink.addEventListener('click', () => trackDealClick(firm.id));
+    dealLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await trackDealClick(firm.id, firm.affiliate_code, firm.affiliate_url);
+      // Open link after tracking
+      window.open(e.target.href, '_blank');
+    });
   }
 
   return card;
@@ -168,7 +185,7 @@ function getExpirationHTML(expiresAt) {
 }
 
 // Copy discount code to clipboard
-async function copyCode(code, button) {
+async function copyCode(code, button, firmId) {
   try {
     await navigator.clipboard.writeText(code);
 
@@ -182,8 +199,21 @@ async function copyCode(code, button) {
       button.classList.remove('copied');
     }, 2000);
 
-    // Track copy event
-    trackEvent('code_copied', { code });
+    // Get influencer data for attribution
+    const result = await chrome.storage.local.get(['influencer_data']);
+    const influencer = result.influencer_data;
+
+    // Track copy event with comprehensive data
+    trackEvent('code_copied', {
+      code: code,
+      firm_id: firmId,
+      source: 'extension_popup',
+      action: 'manual_copy',
+      influencer_id: influencer?.id || null,
+      influencer_name: influencer?.name || null,
+      session_id: getOrCreateSessionId(),
+      timestamp: new Date().toISOString()
+    });
   } catch (error) {
     console.error('Failed to copy code:', error);
     button.textContent = 'Failed';
@@ -193,9 +223,55 @@ async function copyCode(code, button) {
   }
 }
 
-// Track deal click
-function trackDealClick(firmId) {
-  trackEvent('deal_clicked', { firm: firmId });
+// Track deal click with comprehensive attribution data
+async function trackDealClick(firmId, code, affiliateUrl) {
+  try {
+    // Get influencer data for attribution
+    const result = await chrome.storage.local.get(['influencer_data']);
+    const influencer = result.influencer_data;
+
+    // Get or create session ID
+    const sessionId = getOrCreateSessionId();
+
+    const trackingData = {
+      firm_id: firmId,
+      code: code,
+      source: 'extension_popup',
+      click_type: 'get_deal_button',
+      influencer_id: influencer?.id || null,
+      influencer_name: influencer?.name || null,
+      session_id: sessionId,
+      timestamp: new Date().toISOString(),
+      affiliate_url: affiliateUrl
+    };
+
+    // Send to background script for processing
+    chrome.runtime.sendMessage({
+      type: 'deal_button_clicked',
+      firm: firmId,
+      code: code,
+      metadata: trackingData
+    });
+
+    // Also send via standard event tracking
+    trackEvent('deal_clicked', trackingData);
+
+    console.log('[PropDeals] Tracked deal click:', trackingData);
+  } catch (error) {
+    console.error('[PropDeals] Failed to track deal click:', error);
+  }
+}
+
+// Get or create session ID for tracking
+function getOrCreateSessionId() {
+  let sessionId = sessionStorage.getItem('propdeals_session_id');
+
+  if (!sessionId) {
+    sessionId = `pd_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    sessionStorage.setItem('propdeals_session_id', sessionId);
+  }
+
+  return sessionId;
 }
 
 // Track events (for analytics)
@@ -208,6 +284,56 @@ function trackEvent(eventName, properties = {}) {
       timestamp: new Date().toISOString()
     }
   });
+}
+
+// Apply influencer branding
+async function applyInfluencerBranding() {
+  const result = await chrome.storage.local.get(['influencer_data']);
+  const influencer = result.influencer_data;
+
+  if (!influencer) return;
+
+  // Apply custom colors
+  const root = document.documentElement;
+  root.style.setProperty('--primary-color', influencer.branding.primary_color);
+  root.style.setProperty('--secondary-color', influencer.branding.secondary_color);
+  root.style.setProperty('--accent-color', influencer.branding.accent_color);
+
+  // Update page title to influencer's display name
+  if (influencer.display_name) {
+    document.title = influencer.display_name;
+  }
+
+  // Update header text
+  const headerText = document.querySelector('.header-text h1');
+  if (headerText) {
+    // Use logo_text if provided, otherwise display_name
+    headerText.textContent = influencer.branding.logo_text || influencer.display_name || 'PropDeals';
+  }
+
+  const headerSubtext = document.querySelector('.header-text p');
+  if (headerSubtext && influencer.branding.tagline) {
+    headerSubtext.textContent = influencer.branding.tagline;
+  }
+
+  // Apply gradient to header
+  const header = document.querySelector('.header');
+  if (header) {
+    header.style.background = `linear-gradient(135deg, ${influencer.branding.primary_color} 0%, ${influencer.branding.secondary_color} 100%)`;
+  }
+
+  // Update footer if custom footer text provided
+  if (influencer.welcome_message) {
+    const footerDisclosure = document.querySelector('.footer .disclosure');
+    if (footerDisclosure) {
+      // Keep the "How it works" link but update the message
+      const howItWorksLink = footerDisclosure.querySelector('a');
+      footerDisclosure.innerHTML = `💡 ${influencer.welcome_message} `;
+      if (howItWorksLink) {
+        footerDisclosure.appendChild(howItWorksLink);
+      }
+    }
+  }
 }
 
 // Setup event listeners

@@ -1,0 +1,227 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PropDeals White Label Partner Configuration",
+  "description": "Configuration file for white-label partner extensions",
+  "type": "object",
+  "required": ["partner", "extension", "branding", "firms"],
+  "properties": {
+    "partner": {
+      "type": "object",
+      "required": ["id", "name", "email"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]+$",
+          "description": "Unique partner identifier (lowercase, no spaces)",
+          "examples": ["tradewithJohn", "proptrader_mike"]
+        },
+        "name": {
+          "type": "string",
+          "description": "Partner's display name",
+          "examples": ["Trade With John", "Mike's Trading Academy"]
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Partner support email"
+        },
+        "website": {
+          "type": "string",
+          "format": "uri",
+          "description": "Partner's website URL"
+        },
+        "social": {
+          "type": "object",
+          "properties": {
+            "youtube": {"type": "string", "format": "uri"},
+            "twitter": {"type": "string", "format": "uri"},
+            "discord": {"type": "string", "format": "uri"},
+            "instagram": {"type": "string", "format": "uri"}
+          }
+        }
+      }
+    },
+    "extension": {
+      "type": "object",
+      "required": ["name", "description", "version"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 45,
+          "description": "Extension name (max 45 chars for Chrome Web Store)",
+          "examples": ["TradeDeals by John", "Mike's Prop Discounts"]
+        },
+        "short_name": {
+          "type": "string",
+          "maxLength": 12,
+          "description": "Short name for extension icon"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 132,
+          "description": "Extension description (max 132 chars)"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Extension version (semver format)"
+        }
+      }
+    },
+    "branding": {
+      "type": "object",
+      "required": ["primary_color", "theme_name"],
+      "properties": {
+        "theme_name": {
+          "type": "string",
+          "description": "Name of the color theme",
+          "examples": ["Profit Green", "Trading Blue", "Gold Rush"]
+        },
+        "primary_color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Primary brand color (hex)",
+          "examples": ["#10B981", "#3B82F6", "#F59E0B"]
+        },
+        "secondary_color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Secondary/darker color (hex)"
+        },
+        "accent_color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Accent/highlight color (hex)"
+        },
+        "logo_text": {
+          "type": "string",
+          "description": "Text to display as logo in popup",
+          "examples": ["TradeDeals", "PropSaver"]
+        },
+        "tagline": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Tagline shown under logo",
+          "examples": ["Save on prop firms with John", "Your prop discount finder"]
+        }
+      }
+    },
+    "firms": {
+      "type": "array",
+      "description": "List of prop firms this partner wants to support",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["firm_id", "enabled"],
+        "properties": {
+          "firm_id": {
+            "type": "string",
+            "enum": ["ftmo", "apex", "topstep", "myfundedfutures", "the5ers"],
+            "description": "Prop firm identifier"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether to include this firm"
+          },
+          "affiliate_code": {
+            "type": "string",
+            "description": "Partner's affiliate discount code for this firm"
+          },
+          "affiliate_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Partner's affiliate URL with tracking"
+          },
+          "custom_discount": {
+            "type": "object",
+            "description": "Override default discount if partner has exclusive deal",
+            "properties": {
+              "amount": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "description": {
+                "type": "string"
+              },
+              "expires_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      }
+    },
+    "customization": {
+      "type": "object",
+      "properties": {
+        "welcome_message": {
+          "type": "string",
+          "description": "Custom welcome message on first install"
+        },
+        "footer_text": {
+          "type": "string",
+          "description": "Custom footer text in popup"
+        },
+        "show_partner_branding": {
+          "type": "boolean",
+          "description": "Show 'Powered by Partner' in footer",
+          "default": true
+        },
+        "custom_features": {
+          "type": "object",
+          "properties": {
+            "notifications_default": {
+              "type": "boolean",
+              "description": "Enable notifications by default",
+              "default": true
+            },
+            "show_expiration_countdown": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        }
+      }
+    },
+    "monetization": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "enum": ["revenue_share", "flat_fee", "subscription"],
+          "description": "Monetization model for this partner"
+        },
+        "platform_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "PropDeals platform revenue share (0-1)"
+        },
+        "partner_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Partner revenue share (0-1)"
+        }
+      }
+    },
+    "generated": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "build_version": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

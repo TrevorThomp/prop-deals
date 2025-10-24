@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to PropDeals</title>
+  <link rel="stylesheet" href="../styles/onboarding.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Step 1: Welcome -->
+    <div class="step active" id="step1">
+      <div class="logo">
+        <img src="../icons/icon128.png" alt="PropDeals">
+      </div>
+      <h1>Welcome to PropDeals!</h1>
+      <p class="subtitle">Automatically apply discount codes to prop firm purchases</p>
+
+      <div class="features">
+        <div class="feature">
+          <span class="icon">💰</span>
+          <div>
+            <h3>Save Money</h3>
+            <p>Get the best discounts on prop firm evaluations</p>
+          </div>
+        </div>
+        <div class="feature">
+          <span class="icon">⚡</span>
+          <div>
+            <h3>Auto-Apply Codes</h3>
+            <p>Codes automatically applied at checkout</p>
+          </div>
+        </div>
+        <div class="feature">
+          <span class="icon">🔔</span>
+          <div>
+            <h3>Deal Alerts</h3>
+            <p>Get notified when new deals go live</p>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btnGetStarted">Get Started</button>
+    </div>
+
+    <!-- Step 2: Influencer Selection -->
+    <div class="step" id="step2">
+      <h1>Who sent you?</h1>
+      <p class="subtitle">Select your favorite trading influencer to support them with your purchases</p>
+
+      <div id="influencerList" class="influencer-list">
+        <div class="influencer-loading">
+          <div class="spinner"></div>
+          <p>Loading influencers...</p>
+        </div>
+      </div>
+
+      <div class="or-divider">
+        <span>or</span>
+      </div>
+
+      <button class="btn-secondary" id="btnSkipInfluencer">Skip - Use Default Deals</button>
+
+      <p class="help-text">You can always change this later in settings</p>
+    </div>
+
+    <!-- Step 3: Notifications -->
+    <div class="step" id="step3">
+      <div class="icon-large">🔔</div>
+      <h1>Stay Updated</h1>
+      <p class="subtitle">Get notified when new deals go live or existing deals are about to expire</p>
+
+      <div class="notification-options">
+        <label class="toggle-option">
+          <input type="checkbox" id="notifyNewDeals" checked>
+          <div class="toggle-content">
+            <div class="toggle-text">
+              <h3>New Deal Alerts</h3>
+              <p>When a new discount becomes available</p>
+            </div>
+            <span class="toggle-switch">
+              <span class="slider"></span>
+            </span>
+          </div>
+        </label>
+
+        <label class="toggle-option">
+          <input type="checkbox" id="notifyExpiring" checked>
+          <div class="toggle-content">
+            <div class="toggle-text">
+              <h3>Expiring Deal Reminders</h3>
+              <p>24 hours before a deal expires</p>
+            </div>
+            <span class="toggle-switch">
+              <span class="slider"></span>
+            </span>
+          </div>
+        </label>
+      </div>
+
+      <button class="btn-primary" id="btnCompleteOnboarding">Complete Setup</button>
+      <button class="btn-text" id="btnSkipNotifications">Skip</button>
+    </div>
+
+    <!-- Step 4: Success -->
+    <div class="step" id="step4">
+      <div class="success-icon">✓</div>
+      <h1>You're All Set!</h1>
+      <p class="subtitle" id="successMessage">PropDeals is now active and ready to save you money</p>
+
+      <div class="next-steps">
+        <h3>What's Next?</h3>
+        <ol>
+          <li>Visit any supported prop firm website</li>
+          <li>Browse their evaluation packages</li>
+          <li>At checkout, we'll automatically apply the best discount code</li>
+        </ol>
+      </div>
+
+      <div class="supported-firms">
+        <p><strong>Supported Firms:</strong></p>
+        <div class="firm-logos" id="supportedFirms">
+          <span class="firm-badge">FTMO</span>
+          <span class="firm-badge">Apex</span>
+          <span class="firm-badge">TopStep</span>
+          <span class="firm-badge">MyFundedFutures</span>
+          <span class="firm-badge">The5ers</span>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btnStartSaving">Start Saving</button>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots">
+      <span class="dot active" data-step="1"></span>
+      <span class="dot" data-step="2"></span>
+      <span class="dot" data-step="3"></span>
+      <span class="dot" data-step="4"></span>
+    </div>
+  </div>
+
+  <script src="../scripts/onboarding.js"></script>
+</body>
+</html>

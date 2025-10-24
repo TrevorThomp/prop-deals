@@ -204,6 +204,158 @@ function findElement(selectors) {
 }
 
 /**
+ * Track code application event
+ * @param {string} firmId - Prop firm ID
+ * @param {string} code - Discount code applied
+ * @param {boolean} success - Whether application succeeded
+ * @param {Object} metadata - Additional tracking data
+ */
+async function trackCodeApplication(firmId, code, success, metadata = {}) {
+  try {
+    // Get influencer data for attribution
+    const result = await chrome.storage.local.get(['influencer_data', 'selected_influencer']);
+    const influencer = result.influencer_data;
+
+    const eventData = {
+      firm_id: firmId,
+      code: code,
+      success: success,
+      timestamp: new Date().toISOString(),
+      url: window.location.href,
+      applied_by: 'extension', // This is the key - marks it as extension-applied
+      influencer_id: influencer?.id || null,
+      influencer_name: influencer?.name || null,
+      session_id: getOrCreateSessionId(),
+      ...metadata
+    };
+
+    // Send to background script for processing
+    chrome.runtime.sendMessage({
+      type: 'code_applied',
+      firm: firmId,
+      code: code,
+      success: success,
+      metadata: eventData
+    });
+
+    // Also send to analytics endpoint (if configured)
+    sendToAnalytics('code_applied', eventData);
+
+    console.log('[PropDeals] Tracked code application:', eventData);
+  } catch (error) {
+    console.error('[PropDeals] Failed to track code application:', error);
+  }
+}
+
+/**
+ * Track page view for analytics
+ * @param {string} firmId - Prop firm ID
+ */
+async function trackPageView(firmId) {
+  try {
+    const result = await chrome.storage.local.get(['influencer_data']);
+    const influencer = result.influencer_data;
+
+    const eventData = {
+      type: 'page_view',
+      firm_id: firmId,
+      url: window.location.href,
+      influencer_id: influencer?.id || null,
+      timestamp: new Date().toISOString(),
+      session_id: getOrCreateSessionId()
+    };
+
+    sendToAnalytics('page_view', eventData);
+  } catch (error) {
+    console.error('[PropDeals] Failed to track page view:', error);
+  }
+}
+
+/**
+ * Get or create session ID for tracking
+ * @returns {string}
+ */
+function getOrCreateSessionId() {
+  let sessionId = sessionStorage.getItem('propdeals_session_id');
+
+  if (!sessionId) {
+    sessionId = `pd_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    sessionStorage.setItem('propdeals_session_id', sessionId);
+  }
+
+  return sessionId;
+}
+
+/**
+ * Send event to analytics endpoint
+ * @param {string} eventName - Event name
+ * @param {Object} data - Event data
+ */
+async function sendToAnalytics(eventName, data) {
+  try {
+    // TODO: Replace with your actual analytics endpoint
+    const ANALYTICS_ENDPOINT = 'https://api.propdeals.com/v1/analytics';
+
+    // For now, just log it (replace with actual API call when ready)
+    console.log(`[PropDeals Analytics] ${eventName}:`, data);
+
+    /* Uncomment when analytics endpoint is ready:
+    await fetch(ANALYTICS_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        event: eventName,
+        data: data
+      })
+    });
+    */
+  } catch (error) {
+    console.error('[PropDeals] Analytics error:', error);
+  }
+}
+
+/**
+ * Add tracking parameters to affiliate URL
+ * @param {string} url - Base affiliate URL
+ * @param {string} firmId - Prop firm ID
+ * @param {string} code - Discount code
+ * @returns {Promise<string>} - URL with tracking parameters
+ */
+async function addTrackingParams(url, firmId, code) {
+  try {
+    const result = await chrome.storage.local.get(['influencer_data']);
+    const influencer = result.influencer_data;
+
+    const urlObj = new URL(url);
+
+    // Add UTM parameters for tracking
+    urlObj.searchParams.set('utm_source', 'propdeals_extension');
+    urlObj.searchParams.set('utm_medium', 'browser_extension');
+    urlObj.searchParams.set('utm_campaign', 'auto_apply');
+    urlObj.searchParams.set('utm_content', code);
+
+    // Add influencer tracking
+    if (influencer?.id) {
+      urlObj.searchParams.set('utm_term', influencer.id);
+      urlObj.searchParams.set('pd_influencer', influencer.id);
+    }
+
+    // Add session tracking
+    urlObj.searchParams.set('pd_session', getOrCreateSessionId());
+
+    // Add timestamp
+    urlObj.searchParams.set('pd_ts', Date.now());
+
+    return urlObj.toString();
+  } catch (error) {
+    console.error('[PropDeals] Failed to add tracking params:', error);
+    return url;
+  }
+}
+
+/**
  * Check if an input field already has a value
  * @param {HTMLInputElement} input
  * @returns {boolean}

@@ -79,7 +79,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["data/discounts.json"],
+      "resources": ["data/discounts.json", "api/v1/influencers.json", "pages/onboarding.html"],
       "matches": ["<all_urls>"]
     }
   ]

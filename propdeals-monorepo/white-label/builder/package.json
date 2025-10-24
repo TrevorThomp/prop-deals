@@ -1,0 +1,29 @@
+{
+  "name": "propdeals-white-label-builder",
+  "version": "1.0.0",
+  "description": "White label extension builder for PropDeals partners",
+  "main": "build-extension.js",
+  "scripts": {
+    "build": "node build-extension.js",
+    "build:example": "node build-extension.js ../examples/tradewith-john.json",
+    "start": "node server.js",
+    "test": "node test-builder.js"
+  },
+  "bin": {
+    "propdeals-build": "./build-extension.js"
+  },
+  "keywords": [
+    "propdeals",
+    "white-label",
+    "chrome-extension",
+    "builder"
+  ],
+  "author": "PropDeals",
+  "license": "MIT",
+  "dependencies": {
+    "archiver": "^5.3.1"
+  },
+  "devDependencies": {
+    "express": "^4.18.2"
+  }
+}
